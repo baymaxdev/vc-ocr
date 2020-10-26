@@ -1,12 +1,6 @@
 import React, {useLayoutEffect, useState} from 'react';
-import {
-  View,
-  StyleSheet,
-  Button,
-  Text,
-  Image,
-  ActivityIndicator,
-} from 'react-native';
+import {View, Button, Text, Image, ActivityIndicator} from 'react-native';
+import styles from './styles';
 import ImagePicker from 'react-native-image-picker';
 import vision from '@react-native-firebase/ml-vision';
 
@@ -65,23 +59,5 @@ const Home = ({navigation}) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: 'relative',
-  },
-  indicator: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 export default Home;

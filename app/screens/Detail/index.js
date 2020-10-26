@@ -1,13 +1,18 @@
 import React, {useEffect, useState} from 'react';
 import {TouchableOpacity} from 'react-native';
-import {View, StyleSheet, Image, Text, Dimensions} from 'react-native';
+import {View, Image, Text, Dimensions} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
+import EditModal from '../../components/EditModal';
+import {getNumberOfLines} from '../../utils';
+import styles from './styles';
 
 const Detail = ({route}) => {
   const {uri, data} = route.params;
   const imgWidth = Dimensions.get('screen').width;
   const [imgHeight, setImgHeight] = useState(0);
   const [ratio, setRatio] = useState(0);
+  const [selected, setSelected] = useState(-1);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     Image.getSize(uri, (w, h) => {
@@ -19,7 +24,7 @@ const Detail = ({route}) => {
   const boundingBoxStyle = ({boundingBox, text}) => {
     const width = (boundingBox[2] - boundingBox[0]) * ratio;
     const height = (boundingBox[3] - boundingBox[1]) * ratio;
-    const numberOfLines = text.split(/\r\n|\r|\n/).length;
+    const numberOfLines = getNumberOfLines(text);
     return {
       position: 'absolute',
       backgroundColor: 'rgba(255, 255, 255, 0.5)',
@@ -34,7 +39,16 @@ const Detail = ({route}) => {
   };
 
   const onPressText = index => () => {
-    console.log(index);
+    setSelected(index);
+  };
+
+  const onPressEdit = index => () => {
+    setSelected(index);
+    setModalVisible(true);
+  };
+
+  const onCloseModal = text => {
+    setModalVisible(false);
   };
 
   return (
@@ -44,64 +58,68 @@ const Detail = ({route}) => {
           <Image source={{uri}} style={{width: imgWidth, height: imgHeight}} />
           <View style={styles.boxContainer}>
             {data.blocks.map((block, index) => (
-              <Text key={index.toString()} style={boundingBoxStyle(block)}>
-                {block.text}
-              </Text>
+              <TouchableOpacity onPress={onPressText(index)}>
+                <Text
+                  key={index.toString()}
+                  style={
+                    selected === index
+                      ? {...boundingBoxStyle(block), ...styles.textSelected}
+                      : boundingBoxStyle(block)
+                  }>
+                  {block.text}
+                </Text>
+              </TouchableOpacity>
             ))}
           </View>
         </ScrollView>
       </View>
       <View style={styles.textContainer}>
-        <Text style={styles.textTitle}>Recognized Text Blocks</Text>
+        <View style={styles.textTitleContainer}>
+          <Text style={styles.textTitle}>Recognized Text Blocks</Text>
+          <TouchableOpacity>
+            <Text style={styles.textAdd}>Add</Text>
+          </TouchableOpacity>
+        </View>
         <ScrollView horizontal={false}>
           {data.blocks.map((block, index) => (
-            <TouchableOpacity
-              key={index.toString()}
-              style={styles.textItem}
-              onPress={onPressText(index)}>
-              <Text style={styles.text}>{block.text}</Text>
-            </TouchableOpacity>
+            <View style={styles.textItemContainer}>
+              <TouchableOpacity
+                key={index.toString()}
+                style={styles.textItem}
+                disabled={selected === index}
+                onPress={onPressText(index)}>
+                <Text
+                  style={
+                    selected === index
+                      ? {
+                          ...styles.text,
+                          ...styles.textSelected,
+                        }
+                      : styles.text
+                  }>
+                  {block.text}
+                </Text>
+              </TouchableOpacity>
+              {selected === index && (
+                <TouchableOpacity
+                  style={styles.textItemEdit}
+                  onPress={onPressEdit(index)}>
+                  <Text style={styles.textItemEditText}>Edit</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           ))}
         </ScrollView>
       </View>
+
+      <EditModal
+        visible={modalVisible}
+        original={data.blocks[selected].text}
+        defaultText={data.blocks[selected].text}
+        onClose={onCloseModal}
+      />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  imageContainer: {
-    flex: 1,
-    position: 'relative',
-  },
-  boxContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  textContainer: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
-  textTitle: {
-    fontSize: 20,
-    marginLeft: 10,
-    marginTop: 10,
-  },
-  textItem: {
-    backgroundColor: 'grey',
-    margin: 10,
-    padding: 10,
-    fontSize: 16,
-    borderRadius: 5,
-  },
-  text: {
-    fontSize: 16,
-  },
-});
 
 export default Detail;
