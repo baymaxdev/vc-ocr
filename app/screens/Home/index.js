@@ -1,13 +1,17 @@
-import React, {useLayoutEffect} from 'react';
-import {View, StyleSheet, Button, Text} from 'react-native';
+import React, {useLayoutEffect, useState} from 'react';
+import {View, StyleSheet, Button, Text, Image} from 'react-native';
 import ImagePicker from 'react-native-image-picker';
+import vision from '@react-native-firebase/ml-vision';
 
 const Home = ({navigation}) => {
+  const [image, setImage] = useState(null);
+  const [text, setText] = useState('Hello world');
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => <Button title="Add" onPress={onAdd} />,
     });
-  }, [navigation]);
+  });
 
   const onAdd = () => {
     const options = {
@@ -20,8 +24,6 @@ const Home = ({navigation}) => {
     };
 
     ImagePicker.showImagePicker(options, response => {
-      console.log('Response = ', response);
-
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.error) {
@@ -29,7 +31,12 @@ const Home = ({navigation}) => {
       } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
       } else {
-        const source = {uri: response.uri};
+        setImage({
+          uri: response.uri,
+        });
+        processDocument(response.uri).then(() =>
+          console.log('Finished processing file.'),
+        );
 
         // You can also display the image using data:
         // const source = { uri: 'data:image/jpeg;base64,' + response.data };
@@ -37,15 +44,35 @@ const Home = ({navigation}) => {
     });
   };
 
+  async function processDocument(localPath) {
+    const processed = await vision().cloudDocumentTextRecognizerProcessImage(
+      localPath,
+    );
+
+    console.log('Found text in document: ', processed.text);
+    setText(processed.text);
+
+    processed.blocks.forEach(block => {
+      console.log('Bounding box: ', block.boundingBox);
+    });
+  }
+
   return (
     <View style={styles.container}>
-      <Text>Home Screen</Text>
+      <Image source={image} style={styles.image} />
+      <Text style={styles.text}>{text}</Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  image: {
+    flex: 1,
+  },
+  text: {
     flex: 1,
   },
 });
