@@ -1,11 +1,17 @@
 import React, {useLayoutEffect, useState} from 'react';
-import {View, StyleSheet, Button, Text, Image} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Button,
+  Text,
+  Image,
+  ActivityIndicator,
+} from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import vision from '@react-native-firebase/ml-vision';
 
 const Home = ({navigation}) => {
-  const [image, setImage] = useState(null);
-  const [text, setText] = useState('Hello world');
+  const [processing, setProcessing] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -15,15 +21,14 @@ const Home = ({navigation}) => {
 
   const onAdd = () => {
     const options = {
-      title: 'Select Avatar',
-      customButtons: [{name: 'fb', title: 'Choose Photo from Facebook'}],
+      title: 'Select Image',
       storageOptions: {
         skipBackup: true,
         path: 'images',
       },
     };
 
-    ImagePicker.showImagePicker(options, response => {
+    ImagePicker.showImagePicker(options, async response => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.error) {
@@ -31,36 +36,32 @@ const Home = ({navigation}) => {
       } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
       } else {
-        setImage({
+        setProcessing(true);
+        const processed = await processDocument(response.uri);
+        navigation.navigate('Detail', {
           uri: response.uri,
+          data: processed,
         });
-        processDocument(response.uri).then(() =>
-          console.log('Finished processing file.'),
-        );
 
         // You can also display the image using data:
         // const source = { uri: 'data:image/jpeg;base64,' + response.data };
       }
+
+      setProcessing(false);
     });
   };
 
-  async function processDocument(localPath) {
-    const processed = await vision().cloudDocumentTextRecognizerProcessImage(
-      localPath,
-    );
-
-    console.log('Found text in document: ', processed.text);
-    setText(processed.text);
-
-    processed.blocks.forEach(block => {
-      console.log('Bounding box: ', block.boundingBox);
-    });
-  }
+  const processDocument = async localPath => {
+    return await vision().cloudDocumentTextRecognizerProcessImage(localPath);
+  };
 
   return (
     <View style={styles.container}>
-      <Image source={image} style={styles.image} />
-      <Text style={styles.text}>{text}</Text>
+      {processing && (
+        <View style={styles.indicator}>
+          <ActivityIndicator size="large" />
+        </View>
+      )}
     </View>
   );
 };
@@ -68,12 +69,18 @@ const Home = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    position: 'relative',
   },
-  image: {
-    flex: 1,
-  },
-  text: {
-    flex: 1,
+  indicator: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
