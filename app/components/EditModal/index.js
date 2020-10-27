@@ -1,8 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {TouchableOpacity} from 'react-native';
-import {KeyboardAvoidingView} from 'react-native';
-import {TextInput} from 'react-native';
-import {Modal, Text, TouchableHighlight, View} from 'react-native';
+import {
+  Modal,
+  Text,
+  View,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  TextInput,
+} from 'react-native';
 import styles from './styles';
 
 const EditModal = ({visible, original, defaultText, onClose}) => {

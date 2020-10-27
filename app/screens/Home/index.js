@@ -3,14 +3,17 @@ import {View, Button, Text, Image, ActivityIndicator} from 'react-native';
 import styles from './styles';
 import ImagePicker from 'react-native-image-picker';
 import vision from '@react-native-firebase/ml-vision';
+import {connect} from 'react-redux';
+import {setData} from '../../store/actions';
 
-const Home = ({navigation}) => {
+const Home = ({navigation, data, setData}) => {
   const [processing, setProcessing] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => <Button title="Add" onPress={onAdd} />,
     });
+    console.log('store', data);
   });
 
   const onAdd = () => {
@@ -60,4 +63,17 @@ const Home = ({navigation}) => {
   );
 };
 
-export default Home;
+// export default Home;
+
+const mapStateToProps = state => ({
+  data: state.data,
+});
+
+const mapDispatchToProps = dispatch => ({
+  setData: data => dispatch(setData(setData)),
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Home);

@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {TouchableOpacity} from 'react-native';
-import {View, Image, Text, Dimensions} from 'react-native';
+import {View, Image, Text, Dimensions, TouchableOpacity} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import EditModal from '../../components/EditModal';
 import {getNumberOfLines} from '../../utils';
