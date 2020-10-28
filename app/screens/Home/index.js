@@ -1,20 +1,24 @@
-import React, {useLayoutEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect} from 'react';
 import {View, Button, Text, Image, ActivityIndicator} from 'react-native';
 import styles from './styles';
 import ImagePicker from 'react-native-image-picker';
-import vision from '@react-native-firebase/ml-vision';
+
 import {connect} from 'react-redux';
-import {setData} from '../../store/actions';
+import * as actions from '../../store/actions';
+import Collection from '../../components/Collection';
+import {TouchableOpacity} from 'react-native';
 
-const Home = ({navigation, data, setData}) => {
-  const [processing, setProcessing] = useState(false);
-
+const Home = ({navigation, data, getOCRText, removeData}) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => <Button title="Add" onPress={onAdd} />,
     });
-    console.log('store', data);
+    // removeData(0);
   });
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
 
   const onAdd = () => {
     const options = {
@@ -33,28 +37,30 @@ const Home = ({navigation, data, setData}) => {
       } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
       } else {
-        setProcessing(true);
-        const processed = await processDocument(response.uri);
-        navigation.navigate('Detail', {
-          uri: response.uri,
-          data: processed,
-        });
+        getOCRText(response.uri);
 
         // You can also display the image using data:
         // const source = { uri: 'data:image/jpeg;base64,' + response.data };
       }
-
-      setProcessing(false);
     });
   };
 
-  const processDocument = async localPath => {
-    return await vision().cloudDocumentTextRecognizerProcessImage(localPath);
+  const onPressImage = item => () => {
+    navigation.navigate('Detail', item);
   };
+
+  const renderImage = item => (
+    <TouchableOpacity
+      style={styles.imageContainer}
+      onPress={onPressImage(item)}>
+      <Image style={styles.imageContainer} source={{uri: item.uri}} />
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
-      {processing && (
+      <Collection data={data.data} num={3} renderItem={renderImage} />
+      {data.processing && (
         <View style={styles.indicator}>
           <ActivityIndicator size="large" />
         </View>
@@ -69,9 +75,10 @@ const mapStateToProps = state => ({
   data: state.data,
 });
 
-const mapDispatchToProps = dispatch => ({
-  setData: data => dispatch(setData(setData)),
-});
+const mapDispatchToProps = {
+  getOCRText: actions.getOCRText,
+  removeData: actions.removeData,
+};
 
 export default connect(
   mapStateToProps,

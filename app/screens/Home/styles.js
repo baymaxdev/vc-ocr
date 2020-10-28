@@ -5,6 +5,9 @@ export default StyleSheet.create({
     flex: 1,
     position: 'relative',
   },
+  imageContainer: {
+    flex: 1,
+  },
   indicator: {
     position: 'absolute',
     top: 0,

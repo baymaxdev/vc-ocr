@@ -6,7 +6,7 @@ import {getNumberOfLines} from '../../utils';
 import styles from './styles';
 
 const Detail = ({route}) => {
-  const {uri, data} = route.params;
+  const {uri, blocks} = route.params;
   const imgWidth = Dimensions.get('screen').width;
   const [imgHeight, setImgHeight] = useState(0);
   const [ratio, setRatio] = useState(0);
@@ -56,10 +56,11 @@ const Detail = ({route}) => {
         <ScrollView horizontal={false}>
           <Image source={{uri}} style={{width: imgWidth, height: imgHeight}} />
           <View style={styles.boxContainer}>
-            {data.blocks.map((block, index) => (
-              <TouchableOpacity onPress={onPressText(index)}>
+            {blocks.map((block, index) => (
+              <TouchableOpacity
+                onPress={onPressText(index)}
+                key={index.toString()}>
                 <Text
-                  key={index.toString()}
                   style={
                     selected === index
                       ? {...boundingBoxStyle(block), ...styles.textSelected}
@@ -80,10 +81,9 @@ const Detail = ({route}) => {
           </TouchableOpacity>
         </View>
         <ScrollView horizontal={false}>
-          {data.blocks.map((block, index) => (
-            <View style={styles.textItemContainer}>
+          {blocks.map((block, index) => (
+            <View style={styles.textItemContainer} key={index.toString()}>
               <TouchableOpacity
-                key={index.toString()}
                 style={styles.textItem}
                 disabled={selected === index}
                 onPress={onPressText(index)}>
@@ -113,8 +113,8 @@ const Detail = ({route}) => {
 
       <EditModal
         visible={modalVisible}
-        original={data.blocks[selected].text}
-        defaultText={data.blocks[selected].text}
+        original={blocks[selected] ? blocks[selected].text : ''}
+        defaultText={blocks[selected] ? blocks[selected].text : ''}
         onClose={onCloseModal}
       />
     </View>
