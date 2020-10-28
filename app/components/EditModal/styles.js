@@ -54,7 +54,6 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: 40,
-    borderColor: 'green',
     borderWidth: 1,
     overflow: 'hidden',
   },
@@ -66,12 +65,10 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: 40,
-    borderColor: 'green',
     borderWidth: 1,
     overflow: 'hidden',
   },
   cancelText: {
-    color: 'green',
     fontSize: 16,
   },
   saveText: {

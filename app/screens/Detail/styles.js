@@ -4,6 +4,11 @@ export default StyleSheet.create({
   container: {
     flex: 1,
   },
+  backButton: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
   imageContainer: {
     flex: 1,
     position: 'relative',
@@ -17,41 +22,72 @@ export default StyleSheet.create({
   },
   textContainer: {
     flex: 1,
-    // backgroundColor: 'white',
   },
   textTitleContainer: {
-    margin: 10,
+    padding: 10,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: 'white',
+    shadowOffset: {width: 1, height: 1},
+    shadowColor: 'rgba(0, 0, 0, 0.5)',
+    shadowOpacity: 0.3,
   },
   textTitle: {
-    fontSize: 20,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  addButton: {
+    padding: 10,
+    marginLeft: 10,
+    height: 40,
+    borderRadius: 5,
+    shadowOffset: {width: 1, height: 1},
+    shadowOpacity: 0.2,
   },
   textAdd: {
-    fontSize: 20,
-    color: 'blue',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white',
   },
   textItemContainer: {
     display: 'flex',
     flexDirection: 'row',
     margin: 10,
+    shadowOffset: {width: 1, height: 1},
+    shadowColor: 'rgba(0, 0, 0, 0.5)',
+    shadowOpacity: 0.2,
   },
   textItem: {
     flex: 1,
+    borderRadius: 5,
+    overflow: 'hidden',
   },
   textSelected: {
     color: 'white',
-    backgroundColor: '#FF8888',
+    backgroundColor: '#FF000044',
   },
   text: {
     flex: 1,
     backgroundColor: 'white',
     padding: 10,
     fontSize: 16,
-    borderRadius: 5,
     overflow: 'hidden',
+  },
+  textEdited: {
+    color: 'white',
+  },
+  textOriginal: {
+    backgroundColor: '#00AA0088',
+  },
+  showButton: {
+    padding: 10,
+    backgroundColor: 'white',
+  },
+  showButtonText: {
+    color: 'green',
+    fontSize: 12,
   },
   textItemEdit: {
     backgroundColor: 'white',
@@ -61,7 +97,6 @@ export default StyleSheet.create({
     borderRadius: 5,
   },
   textItemEditText: {
-    color: 'green',
     fontSize: 16,
   },
 });

@@ -1,5 +1,5 @@
-import React, {useEffect, useLayoutEffect} from 'react';
-import {View, Button, Text, Image, ActivityIndicator} from 'react-native';
+import React, {useContext, useLayoutEffect} from 'react';
+import {View, Image, ActivityIndicator, Text} from 'react-native';
 import styles from './styles';
 import ImagePicker from 'react-native-image-picker';
 
@@ -7,18 +7,24 @@ import {connect} from 'react-redux';
 import * as actions from '../../store/actions';
 import Collection from '../../components/Collection';
 import {TouchableOpacity} from 'react-native';
+import NoImage from '../../assets/no-image.png';
+import {ThemeContext} from '../../context';
 
 const Home = ({navigation, data, getOCRText, removeData}) => {
+  const theme = useContext(ThemeContext);
+
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => <Button title="Add" onPress={onAdd} />,
+      headerRight: () => (
+        <TouchableOpacity onPress={onAdd}>
+          <Text style={{...styles.addButton, color: theme.headerTintColor}}>
+            Add
+          </Text>
+        </TouchableOpacity>
+      ),
     });
     // removeData(0);
   });
-
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
 
   const onAdd = () => {
     const options = {
@@ -37,32 +43,46 @@ const Home = ({navigation, data, getOCRText, removeData}) => {
       } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
       } else {
-        getOCRText(response.uri);
-
-        // You can also display the image using data:
-        // const source = { uri: 'data:image/jpeg;base64,' + response.data };
+        getOCRText(response.uri, 'data:image/jpeg;base64,' + response.data);
       }
     });
   };
 
-  const onPressImage = item => () => {
-    navigation.navigate('Detail', item);
+  const onPressImage = index => () => {
+    navigation.navigate('Detail', {
+      dataIndex: index,
+    });
   };
 
-  const renderImage = item => (
-    <TouchableOpacity
-      style={styles.imageContainer}
-      onPress={onPressImage(item)}>
-      <Image style={styles.imageContainer} source={{uri: item.uri}} />
-    </TouchableOpacity>
-  );
+  const renderImage = ({item, index}) => {
+    return (
+      <TouchableOpacity
+        style={styles.imageContainer}
+        onPress={onPressImage(index)}>
+        <Image
+          style={styles.imageContainer}
+          source={{uri: item.uri}}
+          resizeMode="contain"
+        />
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
-      <Collection data={data.data} num={3} renderItem={renderImage} />
+      {data.data.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Image source={NoImage} style={styles.noImage} />
+          <Text style={{...styles.noImageText, color: theme.mainColor}}>
+            No images yet.
+          </Text>
+        </View>
+      ) : (
+        <Collection data={data.data} num={2} renderItem={renderImage} />
+      )}
       {data.processing && (
         <View style={styles.indicator}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color="" />
         </View>
       )}
     </View>

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   Modal,
   Text,
@@ -7,14 +7,20 @@ import {
   KeyboardAvoidingView,
   TextInput,
 } from 'react-native';
+import {ThemeContext} from '../../context';
 import styles from './styles';
 
 const EditModal = ({visible, original, defaultText, onClose}) => {
+  const theme = useContext(ThemeContext);
   const [text, setText] = useState('');
 
   useEffect(() => {
     setText(defaultText);
   }, [defaultText]);
+
+  const onCancel = () => {
+    onClose(null);
+  };
 
   const onSave = () => {
     onClose(text);
@@ -42,10 +48,20 @@ const EditModal = ({visible, original, defaultText, onClose}) => {
             onChangeText={setText}
           />
           <View style={styles.buttons}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelText}>Cancel</Text>
+            <TouchableOpacity
+              style={{...styles.cancelButton, borderColor: theme.mainColor}}
+              onPress={onCancel}>
+              <Text style={{...styles.cancelText, color: theme.mainColor}}>
+                Cancel
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.saveButton} onPress={onSave}>
+            <TouchableOpacity
+              style={{
+                ...styles.saveButton,
+                borderColor: theme.mainColor,
+                backgroundColor: theme.mainColor,
+              }}
+              onPress={onSave}>
               <Text style={styles.saveText}>Save</Text>
             </TouchableOpacity>
           </View>

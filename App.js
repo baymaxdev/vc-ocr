@@ -15,18 +15,22 @@ import {store, persistor} from './app/store';
 
 import {NavigationContainer} from '@react-navigation/native';
 import AppNavigator from './app/navigations';
+import {ThemeContext, themes} from './app/context';
 
 const App = () => {
   return (
     <>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" />
-            <NavigationContainer>
-              <AppNavigator />
-            </NavigationContainer>
-          </SafeAreaView>
+          <ThemeContext.Provider value={themes.light}>
+            <SafeAreaView style={styles.containerBack} />
+            <SafeAreaView style={styles.container}>
+              <StatusBar barStyle="dark-content" />
+              <NavigationContainer>
+                <AppNavigator />
+              </NavigationContainer>
+            </SafeAreaView>
+          </ThemeContext.Provider>
         </PersistGate>
       </Provider>
     </>
@@ -36,6 +40,11 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: 'white',
+  },
+  containerBack: {
+    flex: 0,
+    backgroundColor: '#f4511e',
   },
 });
 
