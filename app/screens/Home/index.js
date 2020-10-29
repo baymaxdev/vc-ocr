@@ -1,4 +1,4 @@
-import React, {useContext, useLayoutEffect} from 'react';
+import React, {useContext, useLayoutEffect, useState} from 'react';
 import {View, Image, ActivityIndicator, Text} from 'react-native';
 import styles from './styles';
 import ImagePicker from 'react-native-image-picker';
@@ -7,23 +7,26 @@ import {connect} from 'react-redux';
 import * as actions from '../../store/actions';
 import Collection from '../../components/Collection';
 import {TouchableOpacity} from 'react-native';
-import NoImage from '../../assets/no-image.png';
 import {ThemeContext} from '../../context';
+import NoImage from '../../assets/no-image.png';
+import Check from '../../assets/check.png';
 
 const Home = ({navigation, data, getOCRText, removeData}) => {
   const theme = useContext(ThemeContext);
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [selectedImages, setSelectedImages] = useState({});
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={onAdd}>
-          <Text style={{...styles.addButton, color: theme.headerTintColor}}>
-            Add
-          </Text>
-        </TouchableOpacity>
-      ),
+      headerRight: () =>
+        deleteMode ? null : (
+          <TouchableOpacity onPress={onAdd}>
+            <Text style={{...styles.addButton, color: theme.headerTintColor}}>
+              Add
+            </Text>
+          </TouchableOpacity>
+        ),
     });
-    // removeData(0);
   });
 
   const onAdd = () => {
@@ -33,6 +36,7 @@ const Home = ({navigation, data, getOCRText, removeData}) => {
         skipBackup: true,
         path: 'images',
       },
+      tintColor: theme.mainColor,
     };
 
     ImagePicker.showImagePicker(options, async response => {
@@ -49,21 +53,59 @@ const Home = ({navigation, data, getOCRText, removeData}) => {
   };
 
   const onPressImage = index => () => {
-    navigation.navigate('Detail', {
-      dataIndex: index,
-    });
+    if (deleteMode) {
+      setSelectedImages({
+        ...selectedImages,
+        [index]: !selectedImages[index],
+      });
+    } else {
+      navigation.navigate('Detail', {
+        dataIndex: index,
+      });
+    }
+  };
+
+  const onLongPressImage = index => () => {
+    if (!deleteMode) {
+      setDeleteMode(true);
+      setSelectedImages({[index]: true});
+    }
+  };
+
+  const onCancelRemove = () => {
+    setDeleteMode(false);
+    setSelectedImages({});
+  };
+
+  const onRemove = () => {
+    console.log(selectedImages);
+    const indexes = Object.keys(selectedImages).filter(
+      key => selectedImages[key],
+    );
+    removeData(indexes);
+    setDeleteMode(false);
+    setSelectedImages({});
   };
 
   const renderImage = ({item, index}) => {
     return (
       <TouchableOpacity
         style={styles.imageContainer}
-        onPress={onPressImage(index)}>
+        onPress={onPressImage(index)}
+        onLongPress={onLongPressImage(index)}>
         <Image
-          style={styles.imageContainer}
+          style={styles.image}
           source={{uri: item.uri}}
           resizeMode="contain"
         />
+        {selectedImages[index] && (
+          <View style={styles.imageOverlay}>
+            <Image
+              style={{...styles.check, tintColor: theme.mainColor}}
+              source={Check}
+            />
+          </View>
+        )}
       </TouchableOpacity>
     );
   };
@@ -78,11 +120,34 @@ const Home = ({navigation, data, getOCRText, removeData}) => {
           </Text>
         </View>
       ) : (
-        <Collection data={data.data} num={2} renderItem={renderImage} />
+        <View style={styles.collectionContainer}>
+          {deleteMode && (
+            <View style={styles.deleteContainer}>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={onCancelRemove}>
+                <Text
+                  style={{...styles.deleteButtonText, color: theme.mainColor}}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.deleteButton} onPress={onRemove}>
+                <Text
+                  style={{...styles.deleteButtonText, color: theme.mainColor}}>
+                  Remove
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          <Collection data={data.data} num={2} renderItem={renderImage} />
+        </View>
       )}
       {data.processing && (
         <View style={styles.indicator}>
-          <ActivityIndicator size="large" color="" />
+          <ActivityIndicator size="large" color={theme.mainColor} />
+          <Text style={{...styles.noImageText, color: theme.mainColor}}>
+            Processing...
+          </Text>
         </View>
       )}
     </View>

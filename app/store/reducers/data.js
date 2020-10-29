@@ -12,13 +12,18 @@ export const initialState = {
 };
 
 const reducer = (state = initialState, action = {}) => {
+  const {data} = state;
   switch (action.type) {
     case SET_DATA:
       return {...state, data: [...state.data, action.data]};
     case SET_PROCESSING:
       return {...state, processing: action.processing};
     case REMOVE_DATA:
-      return {...state, data: [...state.data.splice(action.index, 1)]};
+      const {indexes} = action;
+      const newData = data.filter(
+        (item, index) => !indexes.includes(index.toString()),
+      );
+      return {...state, data: [...newData]};
     case ADD_BLOCK:
       return {...state, data: [...state.data.splice(action.index, 1)]};
     case EDIT_BLOCK:
@@ -30,7 +35,6 @@ const reducer = (state = initialState, action = {}) => {
       };
       blocks.splice(blockIndex, 1, newBlock);
 
-      const {data} = state;
       const editedData = {
         ...data[dataIndex],
         blocks,

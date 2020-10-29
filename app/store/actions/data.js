@@ -17,9 +17,9 @@ export const setProcessing = processing => ({
   processing,
 });
 
-export const removeData = index => ({
+export const removeData = indexes => ({
   type: REMOVE_DATA,
-  index,
+  indexes,
 });
 
 export const addBlock = (block, dataIndex) => ({
