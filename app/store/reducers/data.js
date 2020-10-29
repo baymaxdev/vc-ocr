@@ -13,6 +13,8 @@ export const initialState = {
 
 const reducer = (state = initialState, action = {}) => {
   const {data} = state;
+  const {dataIndex} = action;
+
   switch (action.type) {
     case SET_DATA:
       return {...state, data: [...state.data, action.data]};
@@ -25,9 +27,14 @@ const reducer = (state = initialState, action = {}) => {
       );
       return {...state, data: [...newData]};
     case ADD_BLOCK:
-      return {...state, data: [...state.data.splice(action.index, 1)]};
+      data.splice(dataIndex, 1, {
+        ...data[dataIndex],
+        blocks: [...state.data[dataIndex].blocks, action.block],
+        updatedAt: Date.now(),
+      });
+      return {...state, data: [...data]};
     case EDIT_BLOCK:
-      const {text, blockIndex, dataIndex} = action;
+      const {text, blockIndex} = action;
       const {blocks} = state.data[dataIndex];
       const newBlock = {
         ...blocks[blockIndex],

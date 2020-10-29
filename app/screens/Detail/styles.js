@@ -66,7 +66,6 @@ export default StyleSheet.create({
   },
   textSelected: {
     color: 'white',
-    backgroundColor: '#FF000044',
   },
   text: {
     flex: 1,
@@ -75,11 +74,8 @@ export default StyleSheet.create({
     fontSize: 16,
     overflow: 'hidden',
   },
-  textEdited: {
-    color: 'white',
-  },
   textOriginal: {
-    backgroundColor: '#00AA0088',
+    backgroundColor: 'green',
   },
   showButton: {
     padding: 10,

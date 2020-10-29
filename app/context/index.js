@@ -4,11 +4,16 @@ export const themes = {
   light: {
     mainColor: '#F4511E',
     headerTintColor: '#FFF',
-    editedColor: '#00FF0044',
+    selectedColor: '#AA004488',
+    editedColor: '#44AA0088',
+    addedColor: '#0044AA88',
   },
   dark: {
     mainColor: '#F4511E',
-    editedColor: '#88FF88',
+    headerTintColor: '#FFF',
+    selectedColor: '#AA004488',
+    editedColor: '#44AA0088',
+    addedColor: '#0044AA88',
   },
 };
 

@@ -7,6 +7,7 @@ import * as actions from '../../store/actions';
 import styles from './styles';
 import {connect} from 'react-redux';
 import {ThemeContext} from '../../context';
+import AddModal from '../../components/AddModal';
 
 const Detail = ({navigation, route, data, addBlock, editBlock}) => {
   const {dataIndex} = route.params;
@@ -16,6 +17,7 @@ const Detail = ({navigation, route, data, addBlock, editBlock}) => {
   const [ratio, setRatio] = useState(0);
   const [selected, setSelected] = useState(-1);
   const [modalVisible, setModalVisible] = useState(false);
+  const [addModalVisible, setAddModalVisible] = useState(false);
   const [show, setShow] = useState([]);
 
   const theme = useContext(ThemeContext);
@@ -30,7 +32,6 @@ const Detail = ({navigation, route, data, addBlock, editBlock}) => {
         </TouchableOpacity>
       ),
     });
-    // removeData(0);
   });
 
   useEffect(() => {
@@ -44,7 +45,10 @@ const Detail = ({navigation, route, data, addBlock, editBlock}) => {
     setShow(Array(blocks.length).fill(false));
   }, [blocks]);
 
-  const boundingBoxStyle = ({boundingBox, text, editedText}, index) => {
+  const boundingBoxStyle = (
+    {boundingBox, text, editedText, isAdded},
+    index,
+  ) => {
     const width = (boundingBox[2] - boundingBox[0]) * ratio;
     const height = (boundingBox[3] - boundingBox[1]) * ratio;
     const numberOfLines = getNumberOfLines(text);
@@ -64,32 +68,50 @@ const Detail = ({navigation, route, data, addBlock, editBlock}) => {
       ? {
           ...style,
           ...styles.textSelected,
+          backgroundColor: theme.selectedColor,
+        }
+      : isAdded
+      ? {
+          ...style,
+          ...styles.textSelected,
+          backgroundColor: theme.addedColor,
         }
       : editedText
       ? {
           ...style,
-          ...styles.textEdited,
+          ...styles.textSelected,
           backgroundColor: theme.editedColor,
         }
       : style;
   };
 
-  const textStyle = (index, editedText) =>
+  const textStyle = (index, block) =>
     selected === index
       ? {
           ...styles.text,
           ...styles.textSelected,
+          backgroundColor: theme.selectedColor,
         }
-      : editedText
+      : block.isAdded
       ? {
           ...styles.text,
-          ...styles.textEdited,
+          ...styles.textSelected,
+          backgroundColor: theme.addedColor,
+        }
+      : block.editedText
+      ? {
+          ...styles.text,
+          ...styles.textSelected,
           backgroundColor: theme.editedColor,
         }
       : styles.text;
 
   const onBack = () => {
     navigation.goBack();
+  };
+
+  const onAddBlock = () => {
+    setAddModalVisible(true);
   };
 
   const onPressText = index => () => {
@@ -112,6 +134,19 @@ const Detail = ({navigation, route, data, addBlock, editBlock}) => {
     setModalVisible(false);
     if (text) {
       editBlock(text, selected, dataIndex);
+    }
+  };
+
+  const onCloseAddModal = text => {
+    setAddModalVisible(false);
+    if (text) {
+      // needs to be improved later
+      const newBlock = {
+        boundingBox: [100, 100, 500, 130],
+        text,
+        isAdded: true,
+      };
+      addBlock(newBlock, dataIndex);
     }
   };
 
@@ -143,7 +178,8 @@ const Detail = ({navigation, route, data, addBlock, editBlock}) => {
               ...styles.addButton,
               backgroundColor: theme.mainColor,
               shadowColor: theme.mainColor,
-            }}>
+            }}
+            onPress={onAddBlock}>
             <Text style={styles.textAdd}>Add</Text>
           </TouchableOpacity>
         </View>
@@ -154,13 +190,13 @@ const Detail = ({navigation, route, data, addBlock, editBlock}) => {
                 style={styles.textItem}
                 disabled={selected === index}
                 onPress={onPressText(index)}>
-                <Text style={textStyle(index, block.editedText)}>
+                <Text style={textStyle(index, block)}>
                   {block.editedText || block.text}
                 </Text>
                 {show[index] && (
                   <Text
                     style={{
-                      ...textStyle(index, block.editedText),
+                      ...textStyle(index, block),
                       ...styles.textOriginal,
                     }}>
                     {block.text}
@@ -208,6 +244,8 @@ const Detail = ({navigation, route, data, addBlock, editBlock}) => {
         }
         onClose={onCloseModal}
       />
+
+      <AddModal visible={addModalVisible} onClose={onCloseAddModal} />
     </View>
   );
 };
