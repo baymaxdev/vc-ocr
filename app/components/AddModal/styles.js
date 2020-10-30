@@ -16,7 +16,6 @@ export default StyleSheet.create({
   },
   addTextLabel: {
     fontSize: 16,
-    marginTop: 20,
     color: 'grey',
   },
   textInput: {

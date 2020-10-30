@@ -19,6 +19,9 @@ const Detail = ({navigation, route, data, addBlock, editBlock}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [show, setShow] = useState([]);
+  const [addMode, setAddMode] = useState(false);
+  const [drawStart, setDrawStart] = useState({x: 0, y: 0});
+  const [drawEnd, setDrawEnd] = useState({x: 0, y: 0});
 
   const theme = useContext(ThemeContext);
 
@@ -28,6 +31,13 @@ const Detail = ({navigation, route, data, addBlock, editBlock}) => {
         <TouchableOpacity onPress={onBack}>
           <Text style={{...styles.backButton, color: theme.headerTintColor}}>
             Back
+          </Text>
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <TouchableOpacity onPress={onAddBlock}>
+          <Text style={{...styles.addButton, color: theme.headerTintColor}}>
+            {addMode ? 'Cancel' : 'Add'}
           </Text>
         </TouchableOpacity>
       ),
@@ -106,12 +116,27 @@ const Detail = ({navigation, route, data, addBlock, editBlock}) => {
         }
       : styles.text;
 
+  const addModeStyle = () => ({
+    position: 'absolute',
+    backgroundColor: theme.addedColor,
+    left: drawStart.x,
+    top: drawStart.y,
+    width: drawEnd.x - drawStart.x,
+    height: drawEnd.y - drawStart.y,
+  });
+
   const onBack = () => {
     navigation.goBack();
   };
 
   const onAddBlock = () => {
-    setAddModalVisible(true);
+    if (addMode) {
+      setAddMode(false);
+    } else {
+      setAddMode(true);
+      setDrawStart({x: 0, y: 0});
+      setDrawEnd({x: 0, y: 0});
+    }
   };
 
   const onPressText = index => () => {
@@ -139,10 +164,15 @@ const Detail = ({navigation, route, data, addBlock, editBlock}) => {
 
   const onCloseAddModal = text => {
     setAddModalVisible(false);
+    setAddMode(false);
     if (text) {
-      // needs to be improved later
       const newBlock = {
-        boundingBox: [100, 100, 500, 130],
+        boundingBox: [
+          drawStart.x / ratio,
+          drawStart.y / ratio,
+          drawEnd.x / ratio,
+          drawEnd.y / ratio,
+        ],
         text,
         isAdded: true,
       };
@@ -150,89 +180,128 @@ const Detail = ({navigation, route, data, addBlock, editBlock}) => {
     }
   };
 
+  const onDrawStart = event => {
+    const pos = {
+      x: event.nativeEvent.locationX,
+      y: event.nativeEvent.locationY,
+    };
+    setDrawStart(pos);
+    setDrawEnd(pos);
+  };
+
+  const onDrawMove = event => {
+    const pos = {
+      x: event.nativeEvent.locationX,
+      y: event.nativeEvent.locationY,
+    };
+    setDrawEnd(pos);
+  };
+
+  const onDrawEnd = event => {
+    const pos = {
+      x: event.nativeEvent.locationX,
+      y: event.nativeEvent.locationY,
+    };
+    setDrawEnd(pos);
+    setAddModalVisible(true);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        <ScrollView horizontal={false}>
+        <ScrollView horizontal={false} scrollEnabled={!addMode}>
           <Image source={{uri}} style={{width: imgWidth, height: imgHeight}} />
-          <View style={styles.boxContainer}>
-            {blocks.map((block, index) => (
-              <TouchableOpacity
-                onPress={onPressText(index)}
-                key={index.toString()}>
-                <Text style={boundingBoxStyle(block, index)}>
-                  {block.editedText || block.text}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          {!addMode && (
+            <View style={styles.boxContainer}>
+              {blocks.map((block, index) => (
+                <TouchableOpacity
+                  onPress={onPressText(index)}
+                  key={index.toString()}>
+                  <Text style={boundingBoxStyle(block, index)}>
+                    {block.editedText || block.text}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+          {addMode && (
+            <View
+              style={styles.drawContainer}
+              onTouchStart={onDrawStart}
+              onTouchMove={onDrawMove}
+              onTouchEnd={onDrawEnd}>
+              <View style={addModeStyle()} />
+            </View>
+          )}
         </ScrollView>
       </View>
-      <View style={styles.textContainer}>
-        <View style={styles.textTitleContainer}>
-          <Text style={{...styles.textTitle, color: theme.mainColor}}>
-            Recognized Text Blocks
-          </Text>
-          <TouchableOpacity
-            style={{
-              ...styles.addButton,
-              backgroundColor: theme.mainColor,
-              shadowColor: theme.mainColor,
-            }}
-            onPress={onAddBlock}>
-            <Text style={styles.textAdd}>Add</Text>
-          </TouchableOpacity>
-        </View>
-        <ScrollView horizontal={false}>
-          {blocks.map((block, index) => (
-            <View style={styles.textItemContainer} key={index.toString()}>
-              <TouchableOpacity
-                style={styles.textItem}
-                disabled={selected === index}
-                onPress={onPressText(index)}>
-                <Text style={textStyle(index, block)}>
-                  {block.editedText || block.text}
-                </Text>
-                {show[index] && (
-                  <Text
-                    style={{
-                      ...textStyle(index, block),
-                      ...styles.textOriginal,
-                    }}>
-                    {block.text}
+      {!addMode && (
+        <View style={styles.textContainer}>
+          <View style={styles.textTitleContainer}>
+            <Text style={{...styles.textTitle, color: theme.mainColor}}>
+              Recognized Text Blocks
+            </Text>
+            <TouchableOpacity
+              style={{
+                ...styles.addButton2,
+                backgroundColor: theme.mainColor,
+                shadowColor: theme.mainColor,
+              }}
+              onPress={onAddBlock}>
+              <Text style={styles.textAdd}>Add</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView horizontal={false}>
+            {blocks.map((block, index) => (
+              <View style={styles.textItemContainer} key={index.toString()}>
+                <TouchableOpacity
+                  style={styles.textItem}
+                  disabled={selected === index}
+                  onPress={onPressText(index)}>
+                  <Text style={textStyle(index, block)}>
+                    {block.editedText || block.text}
                   </Text>
-                )}
-                {block.editedText && (
-                  <TouchableOpacity
-                    style={styles.showButton}
-                    onPress={onPressShow(index)}>
+                  {show[index] && (
                     <Text
                       style={{
-                        ...styles.showButtonText,
+                        ...textStyle(index, block),
+                        ...styles.textOriginal,
+                      }}>
+                      {block.text}
+                    </Text>
+                  )}
+                  {block.editedText && (
+                    <TouchableOpacity
+                      style={styles.showButton}
+                      onPress={onPressShow(index)}>
+                      <Text
+                        style={{
+                          ...styles.showButtonText,
+                          color: theme.mainColor,
+                        }}>
+                        {show[index] ? 'Show less' : 'Show original'}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </TouchableOpacity>
+                {selected === index && (
+                  <TouchableOpacity
+                    style={styles.textItemEdit}
+                    onPress={onPressEdit(index)}>
+                    <Text
+                      style={{
+                        ...styles.textItemEditText,
                         color: theme.mainColor,
                       }}>
-                      {show[index] ? 'Show less' : 'Show original'}
+                      Edit
                     </Text>
                   </TouchableOpacity>
                 )}
-              </TouchableOpacity>
-              {selected === index && (
-                <TouchableOpacity
-                  style={styles.textItemEdit}
-                  onPress={onPressEdit(index)}>
-                  <Text
-                    style={{
-                      ...styles.textItemEditText,
-                      color: theme.mainColor,
-                    }}>
-                    Edit
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          ))}
-        </ScrollView>
-      </View>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       <EditModal
         visible={modalVisible}

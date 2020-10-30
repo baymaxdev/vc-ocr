@@ -9,11 +9,23 @@ export default StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 10,
   },
+  addButton: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 10,
+  },
   imageContainer: {
     flex: 1,
     position: 'relative',
   },
   boxContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  drawContainer: {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -38,7 +50,7 @@ export default StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  addButton: {
+  addButton2: {
     padding: 10,
     marginLeft: 10,
     height: 40,

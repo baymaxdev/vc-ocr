@@ -17,6 +17,7 @@ export default () => {
           backgroundColor: theme.mainColor,
         },
         headerTintColor: theme.headerTintColor,
+        gestureEnabled: false,
       }}>
       <Stack.Screen name="Home" component={Home} />
       <Stack.Screen name="Detail" component={Detail} />
