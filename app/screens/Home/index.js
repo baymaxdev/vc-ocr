@@ -20,7 +20,7 @@ const Home = ({navigation, data, getOCRText, removeData}) => {
     navigation.setOptions({
       headerRight: () =>
         deleteMode ? null : (
-          <TouchableOpacity onPress={onAdd}>
+          <TouchableOpacity onPress={onAdd} disabled={data.processing}>
             <Text style={{...styles.addButton, color: theme.headerTintColor}}>
               Add
             </Text>
@@ -78,7 +78,6 @@ const Home = ({navigation, data, getOCRText, removeData}) => {
   };
 
   const onRemove = () => {
-    console.log(selectedImages);
     const indexes = Object.keys(selectedImages).filter(
       key => selectedImages[key],
     );
