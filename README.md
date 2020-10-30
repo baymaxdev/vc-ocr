@@ -13,7 +13,7 @@ git clone https://github.com/baymaxdev/vc-ocr.git
 What things you need to install the software and how to install them
 
 ```
-node > 12.17
+node > 12.17 (LTS version is preferred)
 npm > 6.14.4
 XCode > 11.3
 ```
@@ -30,6 +30,11 @@ npm install
 ```
 sudo gem install cocoapods
 npx pod-install
+```
+
+If you run into a version compatibility problem during pod install, please try below inside `./ios`.
+```
+pod repo update
 ```
 
 - Running app on simulators
